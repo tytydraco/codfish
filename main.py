@@ -1,5 +1,6 @@
 import adb
 import pm
+import itertools
 
 
 def migrate(receiving, giving):
@@ -11,20 +12,33 @@ def migrate(receiving, giving):
     pm.migrate_packages(map_missing, receiving, giving)
 
 
-def migrate_both():
+def double_migrate(receiving, giving):
+    migrate(receiving, giving)
+    migrate(giving, receiving)
+
+
+def migrate_all():
     devices = adb.devices()
-    if len(devices) != 2:
-        print('[!] TWO DEVICES REQUIRED')
+    if len(devices) < 2:
+        print('[!] TWO OR MORE DEVICES REQUIRED')
         exit(1)
-    if adb.abi(devices[0]) != adb.abi(devices[1]):
-        print('[!] DEVICE ARCHITECTURE MISMATCH')
-        exit(1)
-    migrate(devices[0], devices[1])
-    migrate(devices[1], devices[0])
+
+    # Use the first device as a baseline architecture and ensure all others match
+    base_device = devices[0]
+    base_device_abi = adb.abi(base_device)
+    for device in devices[1:]:
+        if adb.abi(device) != base_device_abi:
+            print('[!] DEVICE ARCHITECTURE MISMATCH')
+            exit(1)
+
+    # Sync all devices with each other such that all package lists are identical
+    device_combos = list(itertools.combinations(devices, 2))
+    for device_pair in device_combos:
+        double_migrate(device_pair[0], device_pair[1])
 
 
 if adb.sanity_check() is False:
     print('[!] ADB BINARY NOT FOUND')
     exit(1)
 
-migrate_both()
+migrate_all()
