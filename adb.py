@@ -3,6 +3,14 @@ import subprocess
 import re
 
 
+def sanity_check():
+    try:
+        subprocess.call('adb')
+        return True
+    except FileNotFoundError:
+        return False
+
+
 def __run(command):
     return subprocess.run(command, capture_output=True, text=True).stdout
 
