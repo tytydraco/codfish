@@ -2,6 +2,7 @@ import os
 import shutil
 import tempfile
 import adb
+import log
 import miniprogress
 
 tempdir = tempfile.gettempdir()
@@ -43,16 +44,16 @@ def parse_package_list(package_list):
 
 # Get a new package list of everything that the receiver is missing
 def get_device_packages_diff(receiving, giving):
-    print(f'[{receiving.name}] BUILDING PACKAGE LIST')
+    log.dbg(f'[{receiving.name}] BUILDING PACKAGE LIST')
     receiving_pkg_ids = parse_package_list(get_all_packages(receiving))
-    print(f'[{giving.name}] BUILDING PACKAGE LIST')
+    log.dbg(f'[{giving.name}] BUILDING PACKAGE LIST')
     giving_pkg_ids = parse_package_list(get_third_party_packages(giving))
 
     # Map package IDs to their APK(s) location
     missing_pkg_ids = []
     for pkg_id in giving_pkg_ids:
         if pkg_id not in receiving_pkg_ids:
-            print(f'[{receiving.name}] NEEDS: {pkg_id}')
+            log.dbg(f'[{receiving.name}] NEEDS: {pkg_id}')
             missing_pkg_ids.append(pkg_id)
 
     return missing_pkg_ids
@@ -90,9 +91,9 @@ def migrate_packages(missing_pkg_ids, receiving, giving):
         # Check if we are installing a single APK or a split APK
         if len(paths) == 1:
             temp_apk = f'{tempdir}/temp.apk'
-            print(f'[{giving.name}] PULLING: {pkg_id}')
+            log.dbg(f'[{giving.name}] PULLING: {pkg_id}')
             adb.pull(paths[0], temp_apk, giving)
-            print(f'[{receiving.name}] PUSHING: {pkg_id}')
+            log.dbg(f'[{receiving.name}] PUSHING: {pkg_id}')
             adb.install(temp_apk, receiving)
             os.remove(temp_apk)
         else:
@@ -100,11 +101,11 @@ def migrate_packages(missing_pkg_ids, receiving, giving):
             apk_parts = []
             for path in paths:
                 temp_apk = f'{tempdir}/temp.{apk_part}.apk'
-                print(f'[{giving.name}] PULLING: {pkg_id} [PART: {apk_part}]')
+                log.dbg(f'[{giving.name}] PULLING: {pkg_id} [PART: {apk_part}]')
                 adb.pull(path, temp_apk, giving)
                 apk_parts.append(temp_apk)
                 apk_part += 1
-            print(f'[{receiving.name}] PUSHING: {pkg_id} [PARTS: {len(paths)}]')
+            log.dbg(f'[{receiving.name}] PUSHING: {pkg_id} [PARTS: {len(paths)}]')
             adb.install_multiple(apk_parts, receiving)
             for apk in apk_parts:
                 os.remove(apk)
@@ -113,9 +114,9 @@ def migrate_packages(missing_pkg_ids, receiving, giving):
         obb_path = get_obb_path(pkg_id, giving)
         if obb_path is not None:
             temp_obb = f'{tempdir}/obb'
-            print(f'[{giving.name}] PULLING: {pkg_id} [PART: OBB]')
+            log.dbg(f'[{giving.name}] PULLING: {pkg_id} [PART: OBB]')
             adb.pull(obb_path, temp_obb, giving)
-            print(f'[{receiving.name}] PUSHING: {pkg_id} [PART: OBB]')
+            log.dbg(f'[{receiving.name}] PUSHING: {pkg_id} [PART: OBB]')
             adb.push(temp_obb, f'/sdcard/Android/obb/{pkg_id}', receiving)
             shutil.rmtree(temp_obb)
     adb.reset_apk_verification(receiving)
