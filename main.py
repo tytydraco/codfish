@@ -16,6 +16,9 @@ def migrate_both():
     if len(devices) != 2:
         print('[!] TWO DEVICES REQUIRED')
         exit(1)
+    if adb.abi(devices[0]) != adb.abi(devices[1]):
+        print('[!] DEVICE ARCHITECTURE MISMATCH')
+        exit(1)
     migrate(devices[0], devices[1])
     migrate(devices[1], devices[0])
 

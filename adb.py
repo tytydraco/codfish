@@ -85,5 +85,9 @@ def empty(path, device):
     return shell(f'[[ -z "$(ls -A "{path}")" ]] && echo 1', device).strip() == '1'
 
 
+def abi(device):
+    return shell('getprop ro.product.cpu.abi', device)
+
+
 def shell(command, device):
     return adb(f'shell "{command}"', device)
