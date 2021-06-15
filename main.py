@@ -12,11 +12,6 @@ def migrate(receiving, giving):
     pm.migrate_packages(missing_pkg_ids, receiving, giving)
 
 
-def double_migrate(receiving, giving):
-    migrate(receiving, giving)
-    migrate(giving, receiving)
-
-
 def migrate_all():
     devices = adb.devices()
     if len(devices) < 2:
@@ -34,7 +29,8 @@ def migrate_all():
     # Sync all devices with each other such that all package lists are identical
     device_combos = list(itertools.combinations(devices, 2))
     for device_pair in device_combos:
-        double_migrate(device_pair[0], device_pair[1])
+        migrate(device_pair[0], device_pair[1])
+        migrate(device_pair[1], device_pair[0])
 
 
 if adb.sanity_check() is False:
