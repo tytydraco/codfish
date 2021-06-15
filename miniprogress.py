@@ -35,6 +35,6 @@ class MiniProgress:
         filled_chars = (self.char_filled * amount_filled)[:-1] + self.char_filled_head
         empty_chars = ' ' * amount_empty
 
-        log.progress(f'┌{filled_chars}{empty_chars}┐\t{int(percent)}%')
+        log.progress(f'╔{filled_chars}{empty_chars}╗ «{int(percent)}%»')
         if percent == 100:
             print()
