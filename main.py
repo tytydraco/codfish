@@ -5,7 +5,7 @@ import itertools
 
 
 def migrate(receiving, giving):
-    log.dbg(f'[{giving.name}] -> [{receiving.name}]')
+    log.dbg(f'MIGRATING: [{giving.name}] -> [{receiving.name}]')
 
     missing_pkg_ids = pm.get_device_packages_diff(receiving, giving)
     if len(missing_pkg_ids) == 0:
