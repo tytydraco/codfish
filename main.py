@@ -6,10 +6,10 @@ import itertools
 def migrate(receiving, giving):
     print(f'[{giving.name}] -> [{receiving.name}]')
 
-    map_missing = pm.get_device_packages_diff(receiving, giving)
-    if len(map_missing) == 0:
+    missing_pkg_ids = pm.get_device_packages_diff(receiving, giving)
+    if len(missing_pkg_ids) == 0:
         print('[!] NOTHING TO DO')
-    pm.migrate_packages(map_missing, receiving, giving)
+    pm.migrate_packages(missing_pkg_ids, receiving, giving)
 
 
 def double_migrate(receiving, giving):

@@ -22,15 +22,14 @@ def get_package_path(pkg_id, device):
     return adb.shell(f'pm path {pkg_id}', device)
 
 
-# Turn a package list into a map of package IDs and APK paths
-def package_map(package_list, device):
+# Turn a raw package list string into a list of package IDs
+def parse_package_list(package_list):
     lines = package_list \
         .strip() \
         .split('\n')
 
     progress = miniprogress.MiniProgress(len(lines))
 
-    paths = []
     pkg_ids = []
     for line in lines:
         progress.inc()
@@ -39,26 +38,24 @@ def package_map(package_list, device):
         pkg_id = line.replace('package:', '')
         pkg_ids.append(pkg_id)
 
-        path = get_package_path(pkg_id, device).replace('package:', '').strip()
-        paths.append(path.split('\n'))
-
-    return dict(zip(pkg_ids, paths))
+    return pkg_ids
 
 
-# Get a new package map of everything that the receiver is missing
+# Get a new package list of everything that the receiver is missing
 def get_device_packages_diff(receiving, giving):
     print(f'[{receiving.name}] BUILDING PACKAGE LIST')
-    receiving_packages = package_map(get_all_packages(receiving), receiving)
+    receiving_pkg_ids = parse_package_list(get_all_packages(receiving))
     print(f'[{giving.name}] BUILDING PACKAGE LIST')
-    giving_packages = package_map(get_third_party_packages(giving), giving)
+    giving_pkg_ids = parse_package_list(get_third_party_packages(giving))
 
-    map_missing = {}
-    for pkg_id in giving_packages:
-        if pkg_id not in receiving_packages.keys():
-            map_missing[pkg_id] = giving_packages[pkg_id]
-            print(f'[{receiving.name}] NEEDS: {pkg_id} [PARTS: {len(map_missing[pkg_id])}]')
+    # Map package IDs to their APK(s) location
+    missing_pkg_ids = []
+    for pkg_id in giving_pkg_ids:
+        if pkg_id not in receiving_pkg_ids:
+            print(f'[{receiving.name}] NEEDS: {pkg_id}')
+            missing_pkg_ids.append(pkg_id)
 
-    return map_missing
+    return missing_pkg_ids
 
 
 # Return all Android/obb paths found on the system
@@ -83,39 +80,42 @@ def get_obb_path(pkg_id, device):
 
 
 # Install packages from the giver to the receiver
-def migrate_packages(map_missing, receiving, giving):
+def migrate_packages(missing_pkg_ids, receiving, giving):
     # Allow unverified APKs to be installed temporarily
     adb.disable_apk_verification(receiving)
-    for key in map_missing:
+    for pkg_id in missing_pkg_ids:
+        # Find where package APKs live on the giving device
+        paths = get_package_path(pkg_id, giving).replace('package:', '').strip().split('\n')
+
         # Check if we are installing a single APK or a split APK
-        if len(map_missing[key]) == 1:
+        if len(paths) == 1:
             temp_apk = f'{tempdir}/temp.apk'
-            print(f'[{giving.name}] PULLING: {key}')
-            adb.pull(map_missing[key][0], temp_apk, giving)
-            print(f'[{receiving.name}] PUSHING: {key}')
+            print(f'[{giving.name}] PULLING: {pkg_id}')
+            adb.pull(paths[0], temp_apk, giving)
+            print(f'[{receiving.name}] PUSHING: {pkg_id}')
             adb.install(temp_apk, receiving)
             os.remove(temp_apk)
         else:
             apk_part = 0
             apk_parts = []
-            for package_path in map_missing[key]:
+            for path in paths:
                 temp_apk = f'{tempdir}/temp.{apk_part}.apk'
-                print(f'[{giving.name}] PULLING: {key} [PART: {apk_part}]')
-                adb.pull(package_path, temp_apk, giving)
+                print(f'[{giving.name}] PULLING: {pkg_id} [PART: {apk_part}]')
+                adb.pull(path, temp_apk, giving)
                 apk_parts.append(temp_apk)
                 apk_part += 1
-            print(f'[{receiving.name}] PUSHING: {key} [PARTS: {len(map_missing[key])}]')
+            print(f'[{receiving.name}] PUSHING: {pkg_id} [PARTS: {len(paths)}]')
             adb.install_multiple(apk_parts, receiving)
             for apk in apk_parts:
                 os.remove(apk)
         # Push OBB
         # TODO: Handle OBB on external storage
-        obb_path = get_obb_path(key, giving)
+        obb_path = get_obb_path(pkg_id, giving)
         if obb_path is not None:
             temp_obb = f'{tempdir}/obb'
-            print(f'[{giving.name}] PULLING: {key} [PART: OBB]')
+            print(f'[{giving.name}] PULLING: {pkg_id} [PART: OBB]')
             adb.pull(obb_path, temp_obb, giving)
-            print(f'[{receiving.name}] PUSHING: {key} [PART: OBB]')
-            adb.push(temp_obb, f'/sdcard/Android/obb/{key}', receiving)
+            print(f'[{receiving.name}] PUSHING: {pkg_id} [PART: OBB]')
+            adb.push(temp_obb, f'/sdcard/Android/obb/{pkg_id}', receiving)
             shutil.rmtree(temp_obb)
     adb.reset_apk_verification(receiving)
