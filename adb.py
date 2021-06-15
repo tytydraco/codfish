@@ -25,6 +25,10 @@ def devices():
 
     device_list = []
     for line in lines:
+        if 'unauthorized' in line:
+            print('[!] DEVICE UNAUTHORIZED')
+            continue
+
         device = Device()
 
         device.id = re.search('^\\w+', line) \
