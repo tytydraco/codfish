@@ -1,7 +1,10 @@
 import os
 import shutil
+import tempfile
 import adb
 import miniprogress
+
+tempdir = tempfile.gettempdir()
 
 
 # Get all packages installed by the user
@@ -86,7 +89,7 @@ def migrate_packages(map_missing, receiving, giving):
     for key in map_missing:
         # Check if we are installing a single APK or a split APK
         if len(map_missing[key]) == 1:
-            temp_apk = 'temp.apk'
+            temp_apk = f'{tempdir}/temp.apk'
             print(f'[{giving.name}] PULLING: {key}')
             adb.pull(map_missing[key][0], temp_apk, giving)
             print(f'[{receiving.name}] PUSHING: {key}')
@@ -96,7 +99,7 @@ def migrate_packages(map_missing, receiving, giving):
             apk_part = 0
             apk_parts = []
             for package_path in map_missing[key]:
-                temp_apk = f'temp.{apk_part}.apk'
+                temp_apk = f'{tempdir}/temp.{apk_part}.apk'
                 print(f'[{giving.name}] PULLING: {key} [PART: {apk_part}]')
                 adb.pull(package_path, temp_apk, giving)
                 apk_parts.append(temp_apk)
@@ -109,7 +112,7 @@ def migrate_packages(map_missing, receiving, giving):
         # TODO: Handle OBB on external storage
         obb_path = get_obb_path(key, giving)
         if obb_path is not None:
-            temp_obb = 'obb'
+            temp_obb = f'{tempdir}/obb'
             print(f'[{giving.name}] PULLING: {key} [PART: OBB]')
             adb.pull(obb_path, temp_obb, giving)
             print(f'[{receiving.name}] PUSHING: {key} [PART: OBB]')
