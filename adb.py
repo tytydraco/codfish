@@ -5,7 +5,7 @@ import re
 
 def sanity_check():
     try:
-        subprocess.call('adb')
+        subprocess.run('adb', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
     except FileNotFoundError:
         return False
