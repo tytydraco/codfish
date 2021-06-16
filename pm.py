@@ -59,25 +59,12 @@ def get_device_packages_diff(receiving, giving):
     return missing_pkg_ids
 
 
-# Return all Android/obb paths found on the system
-def get_obb_paths(device):
-    return adb.shell('find -L /storage -path \'*/Android/obb\' -type d 2> /dev/null', device) \
-        .strip() \
-        .split('\n')
-
-
 # Get the path to the OBB for this package
-def get_obb_path(pkg_id, device):
-    obb_paths = get_obb_paths(device)
-    if obb_paths == "":
-        return
-
-    # Search all available OBB locations for the first non-empty directory
-    for obb_path in obb_paths:
-        obb_pkg_path = f'{obb_path}/{pkg_id}'
-        if adb.exists(obb_pkg_path, device):
-            if not adb.empty(obb_pkg_path, device):
-                return obb_pkg_path
+def get_package_obb_path(pkg_id, device):
+    obb_pkg_path = f'/storage/self/primary/Android/obb/{pkg_id}'
+    if adb.exists(obb_pkg_path, device):
+        if not adb.empty(obb_pkg_path, device):
+            return obb_pkg_path
 
 
 # Install packages from the giver to the receiver
@@ -109,14 +96,13 @@ def migrate_packages(missing_pkg_ids, receiving, giving):
             adb.install_multiple(apk_parts, receiving)
             for apk in apk_parts:
                 os.remove(apk)
-        # Push OBB
-        # TODO: Handle OBB on external storage
-        obb_path = get_obb_path(pkg_id, giving)
+        # Push OBB if it exists
+        obb_path = get_package_obb_path(pkg_id, giving)
         if obb_path is not None:
             temp_obb = f'{tempdir}/obb'
             log.dbg(f'[{giving.name}] PULLING: {pkg_id} [PART: OBB]')
             adb.pull(obb_path, temp_obb, giving)
             log.dbg(f'[{receiving.name}] PUSHING: {pkg_id} [PART: OBB]')
-            adb.push(temp_obb, f'/sdcard/Android/obb/{pkg_id}', receiving)
+            adb.push(temp_obb, obb_path, receiving)
             shutil.rmtree(temp_obb)
     adb.reset_apk_verification(receiving)
