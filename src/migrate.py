@@ -56,7 +56,7 @@ def migrate_all(devices):
         __migrate(device_pair[1], device_pair[0])
 
 
-def migrate_with_giver_and_receiver(devices, receiver, giver, strict):
+def migrate_with_receiver_and_giver(devices, receiver, giver, strict):
     receiver_device = find_device_given_transport_id(devices, receiver)
     giver_device = find_device_given_transport_id(devices, giver)
     if giver_device is None or receiver_device is None:
@@ -73,7 +73,6 @@ def migrate_with_giver(devices, giver, strict):
         log.err(f'The specified transport id does not match any device')
         sys.exit(1)
 
-    # Sync all receivers with this giver
     devices.remove(giver_device)
     for device in devices:
         __migrate(device, giver_device, strict)
@@ -86,7 +85,6 @@ def migrate_with_receiver(devices, receiver, strict):
         log.err(f'The specified transport id does not match any device')
         sys.exit(1)
 
-    # Sync all receivers with this giver
     devices.remove(receiver_device)
     for device in devices:
         __migrate(receiver_device, device, strict)
@@ -103,18 +101,18 @@ def migrate(receiver=None, giver=None, strict=False):
         log.err('Not enough devices connected; requires two or more')
         sys.exit(1)
 
-    if giver is not None and receiver == giver:
-        log.err('The giver cannot also be the receiver')
+    if receiver is not None and receiver == giver:
+        log.err('The receiver cannot also be the giver')
         sys.exit(1)
 
-    if giver is None and receiver is None:
+    if receiver is None and giver is None:
         if strict:
-            log.err('Giver or receiver must be explicitly set to use strict mode')
+            log.err('Receiver or giver must be explicitly set to use strict mode')
             sys.exit(1)
         migrate_all(devices)
-    elif giver is not None and receiver is not None:
-        migrate_with_giver_and_receiver(devices, receiver, giver, strict)
-    elif giver is not None:
-        migrate_with_giver(devices, giver, strict)
+    elif receiver is not None and giver is not None:
+        migrate_with_receiver_and_giver(devices, receiver, giver, strict)
     elif receiver is not None:
         migrate_with_receiver(devices, receiver, strict)
+    elif giver is not None:
+        migrate_with_giver(devices, giver, strict)
