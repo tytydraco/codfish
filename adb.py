@@ -5,14 +5,14 @@ import re
 
 def sanity_check():
     try:
-        subprocess.run('adb', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run('adb', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
     except FileNotFoundError:
         return False
 
 
 def __run(command):
-    return subprocess.run(command, capture_output=True, text=True).stdout
+    return subprocess.run(command, shell=True, capture_output=True, text=True).stdout
 
 
 def adb(command, device):
