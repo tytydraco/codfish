@@ -14,7 +14,13 @@ def migrate(receiving, giving):
 
 
 def migrate_all():
-    devices = adb.devices()
+    devices = []
+    try:
+        devices = adb.devices()
+    except AttributeError:
+        log.err('FAILED TO ENUMERATE DEVICES')
+        exit(1)
+
     if len(devices) < 2:
         log.err('TWO OR MORE DEVICES REQUIRED')
         exit(1)
