@@ -70,7 +70,14 @@ def reset_apk_verification(device):
 
 
 def pull(path, name, device):
-    adb(f'pull "{path}" "{name}"', device)
+    output = adb(f'pull "{path}" "{name}"', device)
+
+    # Detect if we failed to pull due to a permission error
+    # If so, try copying the file to a permissible location first
+    if 'Permission denied' in output:
+        shell(f'cp -r "{path}" /data/local/tmp/safe_pull', device)
+        adb(f'pull /data/local/tmp/safe_pull "{name}"', device)
+        shell(f'rm -rf /data/local/tmp/safe_pull', device)
 
 
 def push(name, path, device):
