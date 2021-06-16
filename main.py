@@ -40,8 +40,8 @@ def migrate_all():
         migrate(device_pair[1], device_pair[0])
 
 
-if adb.sanity_check() is False:
-    log.err('ADB BINARY NOT FOUND')
-    exit(1)
-
-migrate_all()
+if __name__ == '__main__':
+    if adb.sanity_check() is False:
+        log.err('ADB BINARY NOT FOUND')
+        exit(1)
+    migrate_all()
