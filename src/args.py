@@ -23,6 +23,9 @@ def parse_args():
         Uninstall packages that the receiver lacks from the giver.
         Requires --giver or --receiver to be specified.
     ''')
+    parser.add_argument('-d', '--demo', action='store_true', help='''
+        Simulate the program; do not make any changes
+    ''')
 
     global args
     args = parser.parse_args()

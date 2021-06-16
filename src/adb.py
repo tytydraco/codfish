@@ -1,4 +1,4 @@
-from device import Device
+import device
 import subprocess
 import re
 
@@ -19,7 +19,7 @@ def adb(command, device):
     return __run(f'adb -t {device.transport_id} {command}')
 
 
-def devices():
+def get_devices():
     raw = __run('adb devices -l').strip()
     lines = raw.split('\n')[1:]
 
@@ -29,28 +29,34 @@ def devices():
             print('[!] DEVICE UNAUTHORIZED')
             continue
 
-        device = Device()
+        _device = device.Device()
 
-        device.id = re.search('^\\w+', line) \
+        _device.id = re.search('^\\w+', line) \
             .group(0) \
             .strip() \
             .replace('device:', '')
 
-        device.name = re.search('model:\\w+', line) \
+        _device.name = re.search('model:\\w+', line) \
             .group(0) \
             .strip() \
             .replace('model:', '')
 
-        device.transport_id = int(
+        _device.transport_id = int(
             re.search('transport_id:\\w+', line)
             .group(0)
             .strip()
             .replace('transport_id:', '')
         )
 
-        device_list.append(device)
+        device_list.append(_device)
 
     return device_list
+
+
+def find_device_given_transport_id(devices, transport_id):
+    for device in devices:
+        if device.transport_id == transport_id:
+            return device
 
 
 def install(path, device):
