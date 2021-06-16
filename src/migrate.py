@@ -99,7 +99,7 @@ def migrate(receiver=None, giver=None):
     if giver is None and receiver is None:
         migrate_all(devices)
     elif giver is not None and receiver is not None:
-        migrate_with_giver_and_receiver(devices, giver, receiver)
+        migrate_with_giver_and_receiver(devices, receiver, giver)
     elif giver is not None:
         migrate_with_giver(devices, giver)
     elif receiver is not None:
