@@ -6,7 +6,7 @@ import pm
 
 
 def __migrate(receiving, giving, strict=False):
-    log.dbg(f'Syncing from {giving.name} to {receiving.name}')
+    log.dbg(f'Syncing to {receiving.name} from {giving.name}')
     missing_pkg_ids = pm.get_device_packages_diff(receiving, giving)
     if len(missing_pkg_ids) == 0:
         log.warn('No missing packages to sync')
