@@ -6,7 +6,7 @@ class MiniProgress:
     progress = 0.0
     char_filled = '▒'
     char_filled_head = '▓'
-    visual_width = 50
+    visual_width = 25
 
     def __init__(self, maximum):
         self.maximum = maximum
