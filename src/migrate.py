@@ -5,7 +5,7 @@ import log
 import pm
 
 
-def __migrate(receiving, giving, strict=False):
+def __sync(receiving, giving):
     log.dbg(f'Syncing to {receiving.name} from {giving.name}')
     missing_pkg_ids = pm.get_device_packages_diff(receiving, giving)
     if len(missing_pkg_ids) == 0:
@@ -15,14 +15,15 @@ def __migrate(receiving, giving, strict=False):
             log.dbg(f'Receiver missing: {pkg_id}')
         pm.migrate_packages(missing_pkg_ids, receiving, giving)
 
-    if strict:
-        excess_package_ids = pm.get_device_packages_excess(receiving, giving)
-        if len(excess_package_ids) == 0:
-            log.warn('No excess packages to remove')
-        else:
-            for pkg_id in excess_package_ids:
-                log.dbg(f'[{receiving.name}] Receiver excess: {pkg_id}')
-                adb.uninstall(pkg_id, receiving)
+
+def __trim(receiving, giving):
+    excess_package_ids = pm.get_device_packages_excess(receiving, giving)
+    if len(excess_package_ids) == 0:
+        log.warn('No excess packages to remove')
+    else:
+        for pkg_id in excess_package_ids:
+            log.dbg(f'[{receiving.name}] Receiver excess: {pkg_id}')
+            adb.uninstall(pkg_id, receiving)
 
 
 def find_device_given_transport_id(devices, transport_id):
@@ -52,67 +53,58 @@ def migrate_all(devices):
     # Sync all devices with each other such that all package lists are identical
     device_combos = list(itertools.combinations(devices, 2))
     for device_pair in device_combos:
-        __migrate(device_pair[0], device_pair[1])
-        __migrate(device_pair[1], device_pair[0])
+        __sync(device_pair[0], device_pair[1])
+        __sync(device_pair[1], device_pair[0])
 
 
-def migrate_with_receiver_and_giver(devices, receiver, giver, strict):
-    receiver_device = find_device_given_transport_id(devices, receiver)
-    giver_device = find_device_given_transport_id(devices, giver)
-    if giver_device is None or receiver_device is None:
+def migrate_with_receiver_and_giver(
+        devices,
+        receiver_transport_id,
+        giver_transport_id,
+        strict=False
+):
+    receiver = find_device_given_transport_id(devices, receiver_transport_id)
+    giver = find_device_given_transport_id(devices, giver_transport_id)
+    if giver is None or receiver is None:
         log.err(f'The specified transport id does not match any device')
         sys.exit(1)
-    assert_abis_match([receiver_device, giver_device])
-    __migrate(receiver_device, giver_device, strict)
+    assert_abis_match([receiver, giver])
+    __sync(receiver, giver)
+    if strict:
+        __trim(receiver, giver)
 
 
-def migrate_with_giver(devices, giver, strict):
+def migrate_with_giver(
+        devices,
+        giver_transport_id,
+        strict=False
+):
     assert_abis_match(devices)
-    giver_device = find_device_given_transport_id(devices, giver)
-    if giver_device is None:
+    giver = find_device_given_transport_id(devices, giver_transport_id)
+    if giver is None:
         log.err(f'The specified transport id does not match any device')
         sys.exit(1)
 
-    devices.remove(giver_device)
+    devices.remove(giver)
     for device in devices:
-        __migrate(device, giver_device, strict)
-
-
-def migrate_with_receiver(devices, receiver, strict):
-    assert_abis_match(devices)
-    receiver_device = find_device_given_transport_id(devices, receiver)
-    if receiver_device is None:
-        log.err(f'The specified transport id does not match any device')
-        sys.exit(1)
-
-    devices.remove(receiver_device)
-    for device in devices:
-        __migrate(receiver_device, device, strict)
-
-
-def migrate(receiver=None, giver=None, strict=False):
-    try:
-        devices = adb.devices()
-    except AttributeError:
-        log.err('Failed to enumerate devices')
-        sys.exit(1)
-
-    if len(devices) < 2:
-        log.err('Not enough devices connected; requires two or more')
-        sys.exit(1)
-
-    if receiver is not None and receiver == giver:
-        log.err('The receiver cannot also be the giver')
-        sys.exit(1)
-
-    if receiver is None and giver is None:
+        __sync(device, giver)
         if strict:
-            log.err('Receiver or giver must be explicitly set to use strict mode')
-            sys.exit(1)
-        migrate_all(devices)
-    elif receiver is not None and giver is not None:
-        migrate_with_receiver_and_giver(devices, receiver, giver, strict)
-    elif receiver is not None:
-        migrate_with_receiver(devices, receiver, strict)
-    elif giver is not None:
-        migrate_with_giver(devices, giver, strict)
+            __trim(device, giver)
+
+
+def migrate_with_receiver(
+        devices,
+        receiver_transport_id,
+        strict=False
+):
+    assert_abis_match(devices)
+    receiver = find_device_given_transport_id(devices, receiver_transport_id)
+    if receiver is None:
+        log.err(f'The specified transport id does not match any device')
+        sys.exit(1)
+
+    devices.remove(receiver)
+    for device in devices:
+        __sync(receiver, device)
+        if strict:
+            __trim(receiver, device)
