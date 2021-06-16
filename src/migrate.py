@@ -1,8 +1,8 @@
+import itertools
+import sys
+import adb
 import log
 import pm
-import adb
-import sys
-import itertools
 
 
 def __migrate(receiving, giving, strict=False):

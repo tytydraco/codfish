@@ -29,7 +29,7 @@ def parse_package_list(package_list):
         .strip() \
         .split('\n')
 
-    progress = miniprogress.MiniProgress(len(lines))
+    progress = miniprogress.MiniProgress(len(lines), 'Parsing a package list')
 
     pkg_ids = []
     for line in lines:
@@ -44,7 +44,7 @@ def parse_package_list(package_list):
 
 # Return packages from first that are missing from second
 def diff_package_lists(first, second):
-    progress = miniprogress.MiniProgress(len(second))
+    progress = miniprogress.MiniProgress(len(first), 'Comparing two package lists')
 
     missing_pkg_ids = []
     for pkg_id in first:
