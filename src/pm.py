@@ -42,21 +42,33 @@ def parse_package_list(package_list):
     return pkg_ids
 
 
-# Get a new package list of everything that the receiver is missing
-def get_device_packages_diff(receiving, giving):
-    log.dbg(f'[{receiving.name}] BUILDING PACKAGE LIST')
-    receiving_pkg_ids = parse_package_list(get_all_packages(receiving))
-    log.dbg(f'[{giving.name}] BUILDING PACKAGE LIST')
-    giving_pkg_ids = parse_package_list(get_third_party_packages(giving))
+# Return packages from first that are missing from second
+def diff_package_lists(first, second):
+    progress = miniprogress.MiniProgress(len(second))
 
-    # Map package IDs to their APK(s) location
     missing_pkg_ids = []
-    for pkg_id in giving_pkg_ids:
-        if pkg_id not in receiving_pkg_ids:
-            log.dbg(f'[{receiving.name}] NEEDS: {pkg_id}')
+    for pkg_id in first:
+        progress.inc()
+        progress.visual()
+        if pkg_id not in second:
             missing_pkg_ids.append(pkg_id)
 
     return missing_pkg_ids
+
+
+def get_device_packages_excess(receiving, giving):
+    receiving_pkg_ids = parse_package_list(get_third_party_packages(receiving))
+    giving_pkg_ids = parse_package_list(get_all_packages(giving))
+
+    return diff_package_lists(receiving_pkg_ids, giving_pkg_ids)
+
+
+# Get a new package list of everything that the receiver is missing
+def get_device_packages_diff(receiving, giving):
+    receiving_pkg_ids = parse_package_list(get_all_packages(receiving))
+    giving_pkg_ids = parse_package_list(get_third_party_packages(giving))
+
+    return diff_package_lists(giving_pkg_ids, receiving_pkg_ids)
 
 
 # Get the path to the OBB for this package

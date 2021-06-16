@@ -61,6 +61,10 @@ def install_multiple(paths, device):
     adb(f'install-multiple -t -i com.android.vending {" ".join(paths)}', device)
 
 
+def uninstall(pkg_id, device):
+    adb(f'uninstall {pkg_id}', device)
+
+
 def disable_apk_verification(device):
     shell('settings put global verifier_verify_adb_installs 0', device)
 

@@ -10,4 +10,4 @@ if __name__ == '__main__':
     if adb.sanity_check() is False:
         log.err('ADB BINARY NOT FOUND')
         sys.exit(1)
-    migrate.migrate(args.args.receiver, args.args.giver)
+    migrate.migrate(args.args.receiver, args.args.giver, args.args.strict)

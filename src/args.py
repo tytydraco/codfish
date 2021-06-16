@@ -19,6 +19,10 @@ def parse_args():
         The receiver will not give anything.
         TRANSPORT_ID can be found using "adb devices -l".
     ''')
+    parser.add_argument('-s', '--strict', action='store_true', help='''
+        Uninstall packages that the receiver lacks from the giver.
+        Requires --giver or --receiver to be specified.
+    ''')
 
     global args
     args = parser.parse_args()
