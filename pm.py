@@ -61,7 +61,7 @@ def get_device_packages_diff(receiving, giving):
 
 # Return all Android/obb paths found on the system
 def get_obb_paths(device):
-    return adb.shell('find -L /storage -path \'*/Android/obb\' -type d 2> /dev/null | xargs realpath', device) \
+    return adb.shell('find -L /storage -path \'*/Android/obb\' -type d 2> /dev/null', device) \
         .strip() \
         .split('\n')
 
