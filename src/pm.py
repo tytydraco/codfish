@@ -10,17 +10,17 @@ tempdir = tempfile.gettempdir()
 
 # Get all packages installed by the user
 def get_third_party_packages(device):
-    return adb.shell('pm list packages -3', device)
+    return adb.shell(device, 'pm list packages -3')
 
 
 # Get all packages, including system packages
 def get_all_packages(device):
-    return adb.shell('pm list packages', device)
+    return adb.shell(device, 'pm list packages')
 
 
 # Get the paths to the APKs
 def get_package_path(pkg_id, device):
-    return adb.shell(f'pm path {pkg_id}', device)
+    return adb.shell(device, f'pm path {pkg_id}')
 
 
 # Turn a raw package list string into a list of package IDs
@@ -74,8 +74,8 @@ def get_device_packages_diff(receiving, giving):
 # Get the path to the OBB for this package
 def get_package_obb_path(pkg_id, device):
     obb_pkg_path = f'/storage/self/primary/Android/obb/{pkg_id}'
-    if adb.exists(obb_pkg_path, device):
-        if not adb.empty(obb_pkg_path, device):
+    if adb.exists(device, obb_pkg_path):
+        if not adb.empty(device, obb_pkg_path):
             return obb_pkg_path
 
 
@@ -92,18 +92,18 @@ def migrate_packages(missing_pkg_ids, receiving, giving):
         # Check if we are installing a single APK or a split APK
         if len(paths) == 1:
             temp_apk = f'{tempdir}/temp.apk'
-            adb.pull(paths[0], temp_apk, giving)
-            adb.install(temp_apk, receiving)
+            adb.pull(giving, paths[0], temp_apk)
+            adb.install(receiving, temp_apk)
             os.remove(temp_apk)
         else:
             apk_part = 0
             apk_parts = []
             for path in paths:
                 temp_apk = f'{tempdir}/temp.{apk_part}.apk'
-                adb.pull(path, temp_apk, giving)
+                adb.pull(giving, path, temp_apk)
                 apk_parts.append(temp_apk)
                 apk_part += 1
-            adb.install_multiple(apk_parts, receiving)
+            adb.install_multiple(receiving, apk_parts)
             for apk in apk_parts:
                 os.remove(apk)
         # Push OBB if it exists
@@ -111,7 +111,7 @@ def migrate_packages(missing_pkg_ids, receiving, giving):
         if obb_path is not None:
             log.dbg(f'Receiver getting OBB: {pkg_id}')
             temp_obb = f'{tempdir}/obb'
-            adb.pull(obb_path, temp_obb, giving)
-            adb.push(temp_obb, obb_path, receiving)
+            adb.pull(giving, obb_path, temp_obb)
+            adb.push(receiving, temp_obb, obb_path)
             shutil.rmtree(temp_obb)
     adb.reset_apk_verification(receiving)

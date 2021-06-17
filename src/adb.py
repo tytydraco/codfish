@@ -15,7 +15,7 @@ def __run(command):
     return subprocess.run(command, shell=True, capture_output=True, text=True).stdout.strip()
 
 
-def adb(command, device):
+def adb(device, command):
     return __run(f'adb -t {device.transport_id} {command}')
 
 
@@ -56,52 +56,52 @@ def find_device_given_transport_id(devices, transport_id):
             return device
 
 
-def install(path, device):
-    adb(f'install -t -i com.android.vending {path}', device)
+def install(device, path):
+    adb(device, f'install -t -i com.android.vending {path}')
 
 
-def install_multiple(paths, device):
-    adb(f'install-multiple -t -i com.android.vending {" ".join(paths)}', device)
+def install_multiple(device, paths):
+    adb(device, f'install-multiple -t -i com.android.vending {" ".join(paths)}')
 
 
-def uninstall(pkg_id, device):
-    adb(f'uninstall {pkg_id}', device)
+def uninstall(device, pkg_id):
+    adb(device, f'uninstall {pkg_id}')
 
 
 def disable_apk_verification(device):
-    shell('settings put global verifier_verify_adb_installs 0', device)
+    shell(device, 'settings put global verifier_verify_adb_installs 0')
 
 
 def reset_apk_verification(device):
-    shell('settings delete global verifier_verify_adb_installs', device)
+    shell(device, 'settings delete global verifier_verify_adb_installs')
 
 
-def pull(path, name, device):
-    output = adb(f'pull "{path}" "{name}"', device)
+def pull(device, path, name):
+    output = adb(device, f'pull "{path}" "{name}"')
 
     # Detect if we failed to pull due to a permission error
     # If so, try copying the file to a permissible location first
     if 'Permission denied' in output:
-        shell(f'cp -r "{path}" /data/local/tmp/safe_pull', device)
-        adb(f'pull /data/local/tmp/safe_pull "{name}"', device)
-        shell(f'rm -rf /data/local/tmp/safe_pull', device)
+        shell(device, f'cp -r "{path}" /data/local/tmp/safe_pull')
+        adb(device, f'pull /data/local/tmp/safe_pull "{name}"')
+        shell(device, f'rm -rf /data/local/tmp/safe_pull')
 
 
-def push(name, path, device):
-    adb(f'push "{name}" "{path}"', device)
+def push(device, name, path):
+    adb(device, f'push "{name}" "{path}"')
 
 
-def exists(path, device):
-    return shell(f'[[ -e "{path}" ]] && echo 1', device) == '1'
+def exists(device, path):
+    return shell(device, f'[[ -e "{path}" ]] && echo 1') == '1'
 
 
-def empty(path, device):
-    return shell(f'[[ -z "$(ls -A "{path}")" ]] && echo 1', device) == '1'
+def empty(device, path):
+    return shell(device, f'[[ -z "$(ls -A "{path}")" ]] && echo 1') == '1'
 
 
 def abi(device):
-    return shell('getprop ro.product.cpu.abi', device)
+    return shell(device, 'getprop ro.product.cpu.abi')
 
 
-def shell(command, device):
-    return adb(f'shell "{command}"', device)
+def shell(device, command):
+    return adb(device, f'shell "{command}"')

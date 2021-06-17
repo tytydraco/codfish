@@ -39,7 +39,7 @@ class Migrate:
             for pkg_id in excess_package_ids:
                 log.dbg(f'[{receiving.name}] Receiver excess: {pkg_id}')
                 if not self.demo:
-                    adb.uninstall(pkg_id, receiving)
+                    adb.uninstall(receiving, pkg_id)
 
     @staticmethod
     def do_abis_match(devices):
