@@ -13,16 +13,6 @@ def get_packages(device, additional_args=''):
     return adb.shell(device, f'pm list packages {additional_args}')
 
 
-# Get all packages installed by the user
-def get_third_party_packages(device):
-    return get_packages(device, '-3')
-
-
-# Get all packages, including system packages
-def get_all_packages(device):
-    return get_packages(device)
-
-
 # Get the paths to the APKs
 def get_package_path(pkg_id, device):
     return adb.shell(device, f'pm path {pkg_id}')
@@ -62,16 +52,16 @@ def diff_package_lists(first, second):
 
 
 def get_device_packages_excess(receiving, giving):
-    receiving_pkg_ids = parse_package_list(get_third_party_packages(receiving))
-    giving_pkg_ids = parse_package_list(get_all_packages(giving))
+    receiving_pkg_ids = parse_package_list(get_packages(receiving, '-3'))
+    giving_pkg_ids = parse_package_list(get_packages(giving))
 
     return diff_package_lists(receiving_pkg_ids, giving_pkg_ids)
 
 
 # Get a new package list of everything that the receiver is missing
 def get_device_packages_diff(receiving, giving):
-    receiving_pkg_ids = parse_package_list(get_all_packages(receiving))
-    giving_pkg_ids = parse_package_list(get_third_party_packages(giving))
+    receiving_pkg_ids = parse_package_list(get_packages(receiving))
+    giving_pkg_ids = parse_package_list(get_packages(giving, '-3'))
 
     return diff_package_lists(giving_pkg_ids, receiving_pkg_ids)
 
