@@ -20,7 +20,7 @@ def adb(device, command):
 
 
 def get_current_user(device):
-    return shell('am get-current-user', device)
+    return shell(device, 'am get-current-user')
 
 
 def get_devices():
