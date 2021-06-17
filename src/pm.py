@@ -51,21 +51,6 @@ def diff_package_lists(first, second):
     return missing_pkg_ids
 
 
-def get_device_packages_excess(receiving, giving):
-    receiving_pkg_ids = parse_package_list(get_packages(receiving, '-3'))
-    giving_pkg_ids = parse_package_list(get_packages(giving))
-
-    return diff_package_lists(receiving_pkg_ids, giving_pkg_ids)
-
-
-# Get a new package list of everything that the receiver is missing
-def get_device_packages_diff(receiving, giving):
-    receiving_pkg_ids = parse_package_list(get_packages(receiving))
-    giving_pkg_ids = parse_package_list(get_packages(giving, '-3'))
-
-    return diff_package_lists(giving_pkg_ids, receiving_pkg_ids)
-
-
 # Get the path to the OBB for this package
 def get_package_obb_path(pkg_id, device):
     obb_pkg_path = f'/storage/self/primary/Android/obb/{pkg_id}'

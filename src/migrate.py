@@ -22,7 +22,11 @@ class Migrate:
 
     def __sync(self, receiving, giving):
         log.dbg(f'Syncing to {receiving.name} from {giving.name}')
-        missing_pkg_ids = pm.get_device_packages_diff(receiving, giving)
+
+        receiving_pkg_ids = pm.parse_package_list(pm.get_packages(receiving))
+        giving_pkg_ids = pm.parse_package_list(pm.get_packages(giving, '-3'))
+        missing_pkg_ids = pm.diff_package_lists(giving_pkg_ids, receiving_pkg_ids)
+
         if len(missing_pkg_ids) == 0:
             log.warn('No missing packages to sync')
         else:
@@ -32,7 +36,10 @@ class Migrate:
                 pm.migrate_packages(receiving, giving, missing_pkg_ids)
 
     def __trim(self, receiving, giving):
-        excess_package_ids = pm.get_device_packages_excess(receiving, giving)
+        receiving_pkg_ids = pm.parse_package_list(pm.get_packages(receiving, '-3'))
+        giving_pkg_ids = pm.parse_package_list(pm.get_packages(giving))
+        excess_package_ids = pm.diff_package_lists(receiving_pkg_ids, giving_pkg_ids)
+
         if len(excess_package_ids) == 0:
             log.warn('No excess packages to remove')
         else:
