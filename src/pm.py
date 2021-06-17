@@ -85,7 +85,7 @@ def get_package_obb_path(pkg_id, device):
 
 
 # Install packages from the giver to the receiver
-def migrate_packages(missing_pkg_ids, receiving, giving):
+def migrate_packages(receiving, giving, missing_pkg_ids):
     # Allow unverified APKs to be installed temporarily
     adb.disable_apk_verification(receiving)
     for pkg_id in missing_pkg_ids:

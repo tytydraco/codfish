@@ -29,7 +29,7 @@ class Migrate:
             for pkg_id in missing_pkg_ids:
                 log.dbg(f'Receiver missing: {pkg_id}')
             if not self.demo:
-                pm.migrate_packages(missing_pkg_ids, receiving, giving)
+                pm.migrate_packages(receiving, giving, missing_pkg_ids)
 
     def __trim(self, receiving, giving):
         excess_package_ids = pm.get_device_packages_excess(receiving, giving)
