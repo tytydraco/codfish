@@ -49,3 +49,5 @@ if __name__ == '__main__':
         _migrate.migrate_with_receiver()
     elif giver_transport_id is not None:
         _migrate.migrate_with_giver()
+
+    log.dbg('Done')
