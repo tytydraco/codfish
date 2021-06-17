@@ -1,4 +1,4 @@
-import device
+from device import Device
 import subprocess
 import re
 
@@ -29,7 +29,7 @@ def get_devices():
             print('[!] DEVICE UNAUTHORIZED')
             continue
 
-        _device = device.Device()
+        _device = Device()
 
         _device.id = re.search('^\\w+', line) \
             .group(0) \
