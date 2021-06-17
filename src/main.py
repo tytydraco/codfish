@@ -1,7 +1,7 @@
 import adb
 import log
 import args
-import migrate
+from migrate import Migrate
 import sys
 
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     strict = args.args.strict
     demo = args.args.demo
 
-    _migrate = migrate.Migrate(
+    migrate = Migrate(
         devices,
         receiver_transport_id,
         giver_transport_id,
@@ -42,12 +42,12 @@ if __name__ == '__main__':
         if strict:
             log.err('Receiver or giver must be explicitly set to use strict mode')
             sys.exit(1)
-        _migrate.migrate_all()
+        migrate.migrate_all()
     elif receiver_transport_id is not None and giver_transport_id is not None:
-        _migrate.migrate_with_receiver_and_giver()
+        migrate.migrate_with_receiver_and_giver()
     elif receiver_transport_id is not None:
-        _migrate.migrate_with_receiver()
+        migrate.migrate_with_receiver()
     elif giver_transport_id is not None:
-        _migrate.migrate_with_giver()
+        migrate.migrate_with_giver()
 
     log.dbg('Done')
