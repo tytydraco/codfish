@@ -80,7 +80,7 @@ def migrate_packages(receiving, giving, missing_pkg_ids):
     adb.disable_apk_verification(receiving)
     for pkg_id in missing_pkg_ids:
         # Find where package APKs live on the giving device
-        paths = get_package_path(pkg_id, giving).replace('package:', '').strip().split('\n')
+        paths = get_package_path(pkg_id, giving).replace('package:', '').split('\n')
 
         log.dbg(f'Receiver installing: {pkg_id}')
 
