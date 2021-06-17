@@ -61,7 +61,7 @@ def get_package_obb_path(pkg_id, device):
 # Install packages from the giver to the receiver
 def migrate_packages(receiving, giving, missing_pkg_ids):
     # Allow unverified APKs to be installed temporarily
-    adb.disable_apk_verification(receiving)
+    adb.bypass_apk_verification(receiving, True)
     for pkg_id in missing_pkg_ids:
         # Find where package APKs live on the giving device
         paths = get_package_path(pkg_id, giving).replace('package:', '').split('\n')
@@ -82,7 +82,7 @@ def migrate_packages(receiving, giving, missing_pkg_ids):
                 adb.pull(giving, path, temp_apk)
                 apk_parts.append(temp_apk)
                 apk_part += 1
-            adb.install_multiple(receiving, apk_parts)
+            adb.install(receiving, apk_parts)
             for apk in apk_parts:
                 os.remove(apk)
         # Push OBB if it exists
@@ -93,4 +93,4 @@ def migrate_packages(receiving, giving, missing_pkg_ids):
             adb.pull(giving, obb_path, temp_obb)
             adb.push(receiving, temp_obb, obb_path)
             shutil.rmtree(temp_obb)
-    adb.reset_apk_verification(receiving)
+    adb.bypass_apk_verification(receiving, False)
