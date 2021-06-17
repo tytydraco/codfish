@@ -5,6 +5,7 @@ import adb
 import log
 import miniprogress
 
+# This is where we should store APKs and OBBs temporarily
 tempdir = tempfile.gettempdir()
 
 
@@ -14,17 +15,14 @@ def get_packages(device, additional_args=''):
 
 
 # Get the paths to the APKs
-def get_package_path(pkg_id, device):
+def get_package_path(device, pkg_id):
     return adb.shell(device, f'pm path {pkg_id}')
 
 
 # Turn a raw package list string into a list of package IDs
 def parse_package_list(package_list):
-    lines = package_list \
-        .split('\n')
-
+    lines = package_list.split('\n')
     progress = miniprogress.MiniProgress(len(lines), 'Parsing a package list')
-
     pkg_ids = []
     for line in lines:
         progress.inc()
@@ -44,6 +42,7 @@ def diff_package_lists(first, second):
     for pkg_id in first:
         progress.inc()
         progress.visual()
+
         if pkg_id not in second:
             missing_pkg_ids.append(pkg_id)
 
@@ -51,7 +50,7 @@ def diff_package_lists(first, second):
 
 
 # Get the path to the OBB for this package
-def get_package_obb_path(pkg_id, device):
+def get_package_obb_path(device, pkg_id):
     obb_pkg_path = f'/storage/self/primary/Android/obb/{pkg_id}'
     if adb.exists(device, obb_pkg_path):
         if not adb.empty(device, obb_pkg_path):
@@ -64,7 +63,7 @@ def migrate_packages(receiving, giving, missing_pkg_ids):
     adb.bypass_apk_verification(receiving, True)
     for pkg_id in missing_pkg_ids:
         # Find where package APKs live on the giving device
-        paths = get_package_path(pkg_id, giving).replace('package:', '').split('\n')
+        paths = get_package_path(giving, pkg_id).replace('package:', '').split('\n')
 
         log.dbg(f'Receiver installing: {pkg_id}')
 
@@ -86,7 +85,7 @@ def migrate_packages(receiving, giving, missing_pkg_ids):
             for apk in apk_parts:
                 os.remove(apk)
         # Push OBB if it exists
-        obb_path = get_package_obb_path(pkg_id, giving)
+        obb_path = get_package_obb_path(giving, pkg_id)
         if obb_path is not None:
             log.dbg(f'Receiver getting OBB: {pkg_id}')
             temp_obb = f'{tempdir}/obb'
