@@ -20,7 +20,7 @@ def adb(command, device):
 
 
 def get_devices():
-    raw = __run('adb devices -l').strip()
+    raw = __run('adb devices -l')
     lines = raw.split('\n')[1:]
 
     device_list = []
@@ -33,18 +33,15 @@ def get_devices():
 
         _device.id = re.search('^\\w+', line) \
             .group(0) \
-            .strip() \
             .replace('device:', '')
 
         _device.name = re.search('model:\\w+', line) \
             .group(0) \
-            .strip() \
             .replace('model:', '')
 
         _device.transport_id = int(
             re.search('transport_id:\\w+', line)
             .group(0)
-            .strip()
             .replace('transport_id:', '')
         )
 
@@ -95,11 +92,11 @@ def push(name, path, device):
 
 
 def exists(path, device):
-    return shell(f'[[ -e "{path}" ]] && echo 1', device).strip() == '1'
+    return shell(f'[[ -e "{path}" ]] && echo 1', device) == '1'
 
 
 def empty(path, device):
-    return shell(f'[[ -z "$(ls -A "{path}")" ]] && echo 1', device).strip() == '1'
+    return shell(f'[[ -z "$(ls -A "{path}")" ]] && echo 1', device) == '1'
 
 
 def abi(device):
