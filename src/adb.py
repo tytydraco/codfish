@@ -27,11 +27,6 @@ def shell(device, command):
     return adb(device, f'shell "{command}"')
 
 
-# Returns the current foreground user id
-def get_current_user(device):
-    return shell(device, 'am get-current-user')
-
-
 # Return all connected devices
 def get_devices():
     raw = run('adb devices -l')
