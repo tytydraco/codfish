@@ -19,6 +19,10 @@ def adb(device, command):
     return __run(f'adb -t {device.transport_id} {command}')
 
 
+def get_current_user(device):
+    return shell('am get-current-user', device)
+
+
 def get_devices():
     raw = __run('adb devices -l')
     lines = raw.split('\n')[1:]

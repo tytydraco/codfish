@@ -8,14 +8,19 @@ import miniprogress
 tempdir = tempfile.gettempdir()
 
 
+# Backend method to run pm list packages with a few arguments
+def get_packages(device, additional_args=''):
+    return adb.shell(device, f'pm list packages {additional_args}')
+
+
 # Get all packages installed by the user
 def get_third_party_packages(device):
-    return adb.shell(device, 'pm list packages -3')
+    return get_packages(device, '-3')
 
 
 # Get all packages, including system packages
 def get_all_packages(device):
-    return adb.shell(device, 'pm list packages')
+    return get_packages(device)
 
 
 # Get the paths to the APKs
