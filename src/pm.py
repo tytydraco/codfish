@@ -21,7 +21,6 @@ def get_package_path(pkg_id, device):
 # Turn a raw package list string into a list of package IDs
 def parse_package_list(package_list):
     lines = package_list \
-        .strip() \
         .split('\n')
 
     progress = miniprogress.MiniProgress(len(lines), 'Parsing a package list')
