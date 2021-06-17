@@ -20,7 +20,7 @@ APKs and OBBs are transferred to both devices to ensure each client has a copy o
 - Specify `-d` or `--demo` to do a safe run of the program where no changes will be made. It is *highly* recommended to run this program with demo mode first to make sure the final result is desirable.
 
 # How-to
-1. Connect two Android devices to your computer
-2. Ensure ADB is properly configured both both the clients and the host
+1. Connect two or more Android devices to your computer
+2. Ensure ADB is properly configured
 3. Navigate to `src`
 4. `python main.py`
