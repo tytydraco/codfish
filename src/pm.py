@@ -1,12 +1,5 @@
-import os
-import shutil
-import tempfile
 import adb
-import log
 import miniprogress
-
-# This is where we should store APKs and OBBs temporarily
-tempdir = tempfile.gettempdir()
 
 
 # Backend method to run pm list packages with a few arguments
@@ -55,41 +48,3 @@ def get_package_obb_path(device, pkg_id):
     if adb.exists(device, obb_pkg_path):
         if not adb.empty(device, obb_pkg_path):
             return obb_pkg_path
-
-
-# Install packages from the giver to the receiver
-def migrate_packages(receiving, giving, missing_pkg_ids):
-    # Allow unverified APKs to be installed temporarily
-    adb.bypass_apk_verification(receiving, True)
-    for pkg_id in missing_pkg_ids:
-        # Find where package APKs live on the giving device
-        paths = get_package_path(giving, pkg_id).replace('package:', '').split('\n')
-
-        log.dbg(f'Receiver installing: {pkg_id}')
-
-        # Check if we are installing a single APK or a split APK
-        if len(paths) == 1:
-            temp_apk = f'{tempdir}/temp.apk'
-            adb.pull(giving, paths[0], temp_apk)
-            adb.install(receiving, temp_apk)
-            os.remove(temp_apk)
-        else:
-            apk_part = 0
-            apk_parts = []
-            for path in paths:
-                temp_apk = f'{tempdir}/temp.{apk_part}.apk'
-                adb.pull(giving, path, temp_apk)
-                apk_parts.append(temp_apk)
-                apk_part += 1
-            adb.install(receiving, apk_parts)
-            for apk in apk_parts:
-                os.remove(apk)
-        # Push OBB if it exists
-        obb_path = get_package_obb_path(giving, pkg_id)
-        if obb_path is not None:
-            log.dbg(f'Receiver getting OBB: {pkg_id}')
-            temp_obb = f'{tempdir}/obb'
-            adb.pull(giving, obb_path, temp_obb)
-            adb.push(receiving, temp_obb, obb_path)
-            shutil.rmtree(temp_obb)
-    adb.bypass_apk_verification(receiving, False)
