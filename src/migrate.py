@@ -25,12 +25,9 @@ def sync_missing(receiving, giving, demo=False):
         log.warn('No missing packages to sync')
     else:
         for pkg_id in missing_pkg_ids:
-            log.dbg(f'Receiver installing: {pkg_id}')
+            log.dbg(f'[{receiving.name}] Installing: {pkg_id}')
             if not demo:
                 sync_package(receiving, giving, pkg_id)
-
-            log.dbg(f'Receiver installing OBB: {pkg_id}')
-            if not demo:
                 sync_obb(receiving, giving, pkg_id)
 
 
@@ -77,7 +74,6 @@ def sync_obb(receiving, giving, pkg_id):
 
     obb_path = pm.get_package_obb_path(giving, pkg_id)
     if obb_path is not None:
-        log.dbg(f'Receiver getting OBB: {pkg_id}')
         temp_obb = f'{tempdir}/obb'
         adb.pull(giving, obb_path, temp_obb)
         adb.push(receiving, temp_obb, obb_path)
@@ -94,6 +90,6 @@ def trim_excess(receiving, giving, demo=False):
         log.warn('No excess packages to remove')
     else:
         for pkg_id in excess_package_ids:
-            log.dbg(f'[{receiving.name}] Receiver excess: {pkg_id}')
+            log.dbg(f'[{receiving.name}] Excess: {pkg_id}')
             if not demo:
                 adb.uninstall(receiving, pkg_id)
