@@ -3,8 +3,15 @@ import log
 import pm
 
 
-# Migrate packages from giver to receiver
-def migrate(receiving, giving, demo=False):
+# Helper method to sync and trim
+def migrate(receiving, giving, trim=False, demo=False):
+    sync(receiving, giving, demo)
+    if trim:
+        trim(receiving, giving, demo)
+
+
+# Sync packages from giver to receiver
+def sync(receiving, giving, demo=False):
     log.dbg(f'Syncing to {receiving.name} from {giving.name}')
 
     receiving_pkg_ids = pm.parse_package_list(pm.get_packages(receiving))
@@ -21,7 +28,7 @@ def migrate(receiving, giving, demo=False):
 
 
 # Trim excess packages from receiver that giver lacks
-def trim_excess(receiving, giving, demo=False):
+def trim(receiving, giving, demo=False):
     receiving_pkg_ids = pm.parse_package_list(pm.get_packages(receiving, '-3'))
     giving_pkg_ids = pm.parse_package_list(pm.get_packages(giving))
     excess_package_ids = pm.diff_package_lists(receiving_pkg_ids, giving_pkg_ids)

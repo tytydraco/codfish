@@ -58,16 +58,14 @@ def migrate_all(devices, demo):
     # Sync all devices with each other such that all package lists are identical
     device_combos = list(itertools.combinations(devices, 2))
     for device_pair in device_combos:
-        migrate.migrate(device_pair[0], device_pair[1], demo)
-        migrate.migrate(device_pair[1], device_pair[0], demo)
+        migrate.migrate(device_pair[0], device_pair[1], demo=demo)
+        migrate.migrate(device_pair[1], device_pair[0], demo=demo)
 
 
 def migrate_with_receiver_and_giver(receiver, giver, strict, demo):
     assert_devices_exist(receiver, giver)
     assert_all_abis_match([receiver, giver])
-    migrate.migrate(receiver, giver, demo)
-    if strict:
-        migrate.trim_excess(receiver, giver, demo)
+    migrate.migrate(receiver, giver, strict, demo)
 
 
 def migrate_with_receiver(devices, receiver, strict, demo):
@@ -76,9 +74,7 @@ def migrate_with_receiver(devices, receiver, strict, demo):
     _devices = devices
     _devices.remove(receiver)
     for device in _devices:
-        migrate.migrate(receiver, device, demo)
-        if strict:
-            migrate.trim_excess(receiver, device, demo)
+        migrate.migrate(receiver, device, strict, demo)
 
 
 def migrate_with_giver(devices, giver, strict, demo):
@@ -87,9 +83,7 @@ def migrate_with_giver(devices, giver, strict, demo):
     _devices = devices
     _devices.remove(giver)
     for device in _devices:
-        migrate.migrate(device, giver, demo)
-        if strict:
-            migrate.trim_excess(device, giver, demo)
+        migrate.migrate(device, giver, strict, demo)
 
 
 def main():
