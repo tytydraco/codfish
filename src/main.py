@@ -33,17 +33,13 @@ def assert_devices_exist(*device):
 
 # Bail if devices cannot be enumerated, return them if they can be
 def assert_devices():
-    try:
-        devices = adb.get_devices()
+    devices = adb.get_devices()
 
-        if len(devices) < 2:
-            log.err('Not enough devices connected; requires two or more')
-            sys.exit(1)
-
-        return devices
-    except AttributeError:
-        log.err('Failed to enumerate devices')
+    if len(devices) < 2:
+        log.err('Not enough devices connected; requires two or more')
         sys.exit(1)
+
+    return devices
 
 
 # Bail if user tried to use the receiver as the giver

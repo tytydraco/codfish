@@ -34,20 +34,23 @@ def get_devices():
 
     device_list = []
     for line in lines:
-        device = Device()
-        device.id = re.search('^\\w+', line) \
-            .group(0) \
-            .replace('device:', '')
+        try:
+            device = Device()
+            device.id = re.search('^\\w+', line) \
+                .group(0) \
+                .replace('device:', '')
 
-        device.name = re.search('model:\\w+', line) \
-            .group(0) \
-            .replace('model:', '')
+            device.name = re.search('model:\\w+', line) \
+                .group(0) \
+                .replace('model:', '')
 
-        device.transport_id = int(
-            re.search('transport_id:\\w+', line)
-            .group(0)
-            .replace('transport_id:', '')
-        )
+            device.transport_id = int(
+                re.search('transport_id:\\w+', line)
+                .group(0)
+                .replace('transport_id:', '')
+            )
+        except AttributeError:
+            continue
 
         device_list.append(device)
 
