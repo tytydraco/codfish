@@ -65,12 +65,12 @@ def find_device_given_transport_id(devices, transport_id):
 
 
 # Install a package as if it was installed from the Play Store
-def install(device, *paths):
-    if len(paths) == 1:
-        adb(device, f'install -t -i com.android.vending {paths[0]}')
-    else:
+def install(device, paths):
+    if type(paths) == list:
         paths_string = ' '.join(paths)
         adb(device, f'install-multiple -t -i com.android.vending {paths_string}')
+    else:
+        adb(device, f'install -t -i com.android.vending {paths[0]}')
 
 
 # Uninstall a specific device pacakge
