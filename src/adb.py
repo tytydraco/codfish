@@ -73,7 +73,7 @@ def install(device, paths):
         adb(device, f'install -t -i com.android.vending {paths[0]}')
 
 
-# Uninstall a specific device pacakge
+# Uninstall a specific device package
 def uninstall(device, pkg_id):
     adb(device, f'uninstall {pkg_id}')
 
