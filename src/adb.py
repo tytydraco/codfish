@@ -70,7 +70,7 @@ def install(device, paths):
         paths_string = ' '.join(paths)
         adb(device, f'install-multiple -t -i com.android.vending {paths_string}')
     else:
-        adb(device, f'install -t -i com.android.vending {paths[0]}')
+        adb(device, f'install -t -i com.android.vending {paths}')
 
 
 # Uninstall a specific device package
