@@ -1,7 +1,5 @@
 import argparse
 
-args = None
-
 
 # Parse command line arguments
 def parse_args():
@@ -28,5 +26,4 @@ def parse_args():
         Simulate the program; do not make any changes
     ''')
 
-    global args
-    args = parser.parse_args()
+    return parser.parse_args()

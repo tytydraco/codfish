@@ -83,11 +83,11 @@ def migrate_with_giver(devices, giver, strict, demo):
 
 
 def main():
-    args.parse_args()
-    receiver_transport_id = args.args.receiver
-    giver_transport_id = args.args.giver
-    strict = args.args.strict
-    demo = args.args.demo
+    with args.parse_args() as _args:
+        receiver_transport_id = _args.receiver
+        giver_transport_id = _args.giver
+        strict = _args.strict
+        demo = _args.demo
 
     assert_adb_exists()
     assert_transport_ids(receiver_transport_id, giver_transport_id)
