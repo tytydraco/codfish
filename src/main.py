@@ -49,6 +49,7 @@ def assert_transport_ids(receiver_transport_id, giver_transport_id):
         sys.exit(1)
 
 
+# Sync all devices with each other (implicit givers and receivers)
 def migrate_all(devices, demo):
     assert_all_abis_match(devices)
     # Sync all devices with each other such that all package lists are identical
@@ -58,12 +59,14 @@ def migrate_all(devices, demo):
         migrate.migrate(device_pair[1], device_pair[0], demo=demo)
 
 
+# Sync two devices with each other (explicit giver and receiver)
 def migrate_with_receiver_and_giver(receiver, giver, strict, demo):
     assert_devices_exist(receiver, giver)
     assert_all_abis_match([receiver, giver])
     migrate.migrate(receiver, giver, strict, demo)
 
 
+# Sync given one device as a receiver (others are implicitly givers)
 def migrate_with_receiver(devices, receiver, strict, demo):
     assert_devices_exist(receiver)
     assert_all_abis_match(devices)
@@ -73,6 +76,7 @@ def migrate_with_receiver(devices, receiver, strict, demo):
         migrate.migrate(receiver, device, strict, demo)
 
 
+# Sync given one device as a giver (others are implicitly receivers)
 def migrate_with_giver(devices, giver, strict, demo):
     assert_devices_exist(giver)
     assert_all_abis_match(devices)
@@ -83,16 +87,21 @@ def migrate_with_giver(devices, giver, strict, demo):
 
 
 def main():
+    # Parse command line arguments to determine mode of operations
     with args.parse_args() as _args:
         receiver_transport_id = _args.receiver
         giver_transport_id = _args.giver
         strict = _args.strict
         demo = _args.demo
 
+    # Do sanity checks
     assert_adb_exists()
     assert_transport_ids(receiver_transport_id, giver_transport_id)
+
+    # Enumerate devices
     devices = assert_devices()
 
+    # Assign receiver and giver if provided
     receiver = adb.find_device_given_transport_id(devices, receiver_transport_id)
     giver = adb.find_device_given_transport_id(devices, giver_transport_id)
 
