@@ -88,11 +88,11 @@ def migrate_with_giver(devices, giver, strict, demo):
 
 def main():
     # Parse command line arguments to determine mode of operations
-    with args.parse_args() as _args:
-        receiver_transport_id = _args.receiver
-        giver_transport_id = _args.giver
-        strict = _args.strict
-        demo = _args.demo
+    _args = args.parse_args()
+    receiver_transport_id = _args.receiver
+    giver_transport_id = _args.giver
+    strict = _args.strict
+    demo = _args.demo
 
     # Do sanity checks
     assert_adb_exists()
