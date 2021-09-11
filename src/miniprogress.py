@@ -1,6 +1,7 @@
 import log
 
 
+# Tiny helper library that represents an integer progress bar
 class MiniProgress:
     reason = ''
     maximum = 0.0

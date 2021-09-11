@@ -3,6 +3,7 @@ import argparse
 args = None
 
 
+# Parse command line arguments
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--giver', type=int, metavar='TRANSPORT_ID', help='''

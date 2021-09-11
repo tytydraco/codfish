@@ -12,9 +12,11 @@ def sanity_check():
         return False
 
 
-# Run a subprocess command and return the string output
+# Run a native shell command and return the string output
 def run(command):
-    return subprocess.run(command, shell=True, capture_output=True, text=True).stdout.strip()
+    return str(subprocess
+               .run(command, shell=True, capture_output=True, text=True)
+               .stdout.strip())
 
 
 # Run an ADB command on a device
@@ -27,7 +29,7 @@ def shell(device, command):
     return adb(device, f'shell "{command}"')
 
 
-# Return all connected devices
+# Return all connected devices as Device list
 def get_devices():
     raw = run('adb devices -l')
     lines = raw.split('\n')[1:]
@@ -49,6 +51,7 @@ def get_devices():
                 .group(0)
                 .replace('transport_id:', '')
             )
+        # Skip invalid devices (maybe pending human verification)
         except AttributeError:
             continue
 
@@ -78,7 +81,7 @@ def uninstall(device, pkg_id):
     adb(device, f'uninstall {pkg_id}')
 
 
-# Allow devices to install unsigned APKs
+# Allow devices to install unsigned APKs (use temporarily)
 def bypass_apk_verification(device, mode):
     if mode:
         shell(device, 'settings put global verifier_verify_adb_installs 0')
@@ -95,7 +98,7 @@ def pull(device, path, name):
     if 'Permission denied' in output:
         shell(device, f'cp -r "{path}" /data/local/tmp/safe_pull')
         adb(device, f'pull /data/local/tmp/safe_pull "{name}"')
-        shell(device, f'rm -rf /data/local/tmp/safe_pull')
+        shell(device, 'rm -rf /data/local/tmp/safe_pull')
 
 
 # Push a file to the device

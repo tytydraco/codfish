@@ -1,3 +1,4 @@
+# Data class representing an Android device recognized by ADB
 class Device:
     id = ""
     name = ""
