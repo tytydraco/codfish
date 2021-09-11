@@ -82,11 +82,23 @@ def uninstall(device, pkg_id):
 
 
 # Allow devices to install unsigned APKs (use temporarily)
-def bypass_apk_verification(device, mode):
-    if mode:
-        shell(device, 'settings put global verifier_verify_adb_installs 0')
-    else:
+def set_verify_adb_installs(device, mode):
+    if mode is None:
         shell(device, 'settings delete global verifier_verify_adb_installs')
+    else:
+        value = '1' if mode else '0'
+        shell(device, f'settings put global verifier_verify_adb_installs {value}')
+
+
+# Check if unsigned APKs can be installed for the given device
+def get_verify_adb_installs(device):
+    value = shell(device, 'settings get global verifier_verify_adb_installs')
+    if value == '1':
+        return True
+    elif value == '0':
+        return False
+    else:
+        return None
 
 
 # Pull a package from the device

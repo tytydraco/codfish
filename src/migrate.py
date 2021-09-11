@@ -34,7 +34,8 @@ def sync_missing(receiving, giving, demo=False):
 # Syncs a package from the giver to the receiver
 def sync_package(receiving, giving, pkg_id):
     tempdir = tempfile.gettempdir()
-    adb.bypass_apk_verification(receiving, True)
+    default_verify_status = adb.get_verify_adb_installs(receiving)
+    adb.set_verify_adb_installs(receiving, False)
 
     # Find where package APKs live on the giving device
     paths = pm.get_package_path(giving, pkg_id).replace('package:', '').split('\n')
@@ -65,7 +66,7 @@ def sync_package(receiving, giving, pkg_id):
         for apk in apk_parts:
             os.remove(apk)
 
-    adb.bypass_apk_verification(receiving, False)
+    adb.set_verify_adb_installs(receiving, default_verify_status)
 
 
 # Syncs a single package's OBB from the giver to the receiver
