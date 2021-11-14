@@ -23,7 +23,10 @@ def parse_args():
         Requires --giver or --receiver to be specified.
     ''')
     parser.add_argument('-d', '--demo', action='store_true', help='''
-        Simulate the program; do not make any changes
+        Simulate the program; do not make any changes.
+    ''')
+    parser.add_argument('-e', '--exclude', type=str, metavar='EXCLUSIONS', help='''
+        Exclude packages from being considered; separate IDs by commas.
     ''')
 
     return parser.parse_args()
