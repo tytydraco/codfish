@@ -25,6 +25,10 @@ class Migrate:
 
         receiving_pkg_ids = pm.parse_package_list(pm.get_packages(receiving))
         giving_pkg_ids = pm.parse_package_list(pm.get_packages(giving, '-3'))
+
+        receiving_pkg_ids = [pkg_id for pkg_id in receiving_pkg_ids if pkg_id not in self.exclude]
+        giving_pkg_ids = [pkg_id for pkg_id in giving_pkg_ids if pkg_id not in self.exclude]
+
         missing_pkg_ids = pm.diff_package_lists(giving_pkg_ids, receiving_pkg_ids)
 
         if len(missing_pkg_ids) == 0:
@@ -88,6 +92,10 @@ class Migrate:
     def trim_excess(self, receiving, giving):
         receiving_pkg_ids = pm.parse_package_list(pm.get_packages(receiving, '-3'))
         giving_pkg_ids = pm.parse_package_list(pm.get_packages(giving))
+
+        receiving_pkg_ids = [pkg_id for pkg_id in receiving_pkg_ids if pkg_id not in self.exclude]
+        giving_pkg_ids = [pkg_id for pkg_id in giving_pkg_ids if pkg_id not in self.exclude]
+
         excess_package_ids = pm.diff_package_lists(receiving_pkg_ids, giving_pkg_ids)
 
         if len(excess_package_ids) == 0:

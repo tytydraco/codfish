@@ -5,7 +5,6 @@ import migrate
 import itertools
 import sys
 
-_args = args.parse_args()
 _migrate: migrate.Migrate
 
 # Bail if ADB is missing
@@ -45,8 +44,8 @@ def assert_devices():
 
 
 # Bail if user tried to use the receiver as the giver
-def assert_transport_ids():
-    if _args.receiver is not None and _args.receiver == _args.giver:
+def assert_transport_ids(receiver_transport_id, giver_transport_id):
+    if receiver_transport_id is not None and receiver_transport_id == giver_transport_id:
         log.err('The receiver cannot also be the giver')
         sys.exit(1)
 
@@ -91,14 +90,23 @@ def migrate_with_giver(devices, giver):
 def main():
     global _migrate
 
+    # Parse command line options
+    _args = args.parse_args()
+
     # Do sanity checks
     assert_adb_exists()
-    assert_transport_ids()
+    assert_transport_ids(_args.receiver, _args.giver)
 
     # Enumerate devices
     devices = assert_devices()
 
-    _migrate = migrate.Migrate(devices, _args.strict, _args.demo, _args.exclude)
+    # Parse packages to exclude
+    excluded_ids = None
+    if _args.exclude is not None:
+        excluded_ids = _args.exclude.split(',')
+
+    # Initialize migration class
+    _migrate = migrate.Migrate(devices, _args.strict, _args.demo, excluded_ids)
 
     # Assign receiver and giver if provided
     receiver = adb.find_device_given_transport_id(devices, _args.receiver)
