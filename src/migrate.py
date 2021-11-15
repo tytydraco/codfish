@@ -15,9 +15,9 @@ class Migrate:
 
     # Helper method to sync and trim
     def migrate(self, receiving, giving):
-        self.sync_missing(receiving, giving)
         if self.trim:
             self.trim_excess(receiving, giving)
+        self.sync_missing(receiving, giving)
 
     # Sync missing packages from giver to receiver
     def sync_missing(self, receiving, giving):
